@@ -1,0 +1,12 @@
+FROM golang:1.20-alpine
+
+WORKDIR /app
+
+ADD . /app/
+RUN cd /app
+RUN mkdir -p build
+RUN go build -o build -v ./...
+
+EXPOSE 8080
+
+CMD [ "build/server" ]

@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-deployment
+  namespace: server
+spec:
+  selector:
+    matchLabels:
+      name: server
+  template:
+    metadata:
+      labels:
+        name: server
+        app: server
+    spec:
+      containers:
+      - name: server
+        image: resilience-test/server:v1.1.0
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+          - containerPort: 8080
+        env:
+          - name: WORKER_URL
+            value: http://worker-svc.worker.svc.cluster.local:8081
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-svc
+  namespace: server
+spec:
+  selector:
+    name: server
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-svc-node-port
+  namespace: server
+spec:
+  type: NodePort
+  selector:
+    name: server
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30007
+---
